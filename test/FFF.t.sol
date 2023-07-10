@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: LGPL-3.0-or-later
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
@@ -204,7 +204,7 @@ contract FFFTest is Test {
     }
 
     function testObserveWithSeconds() public {
-        assertEq(fff.observeWithSeconds(0, 2 minutes), 2479301_21461);
+        assertEq(fff.observeWithSeconds(0, 2 minutes),  2479301_21461);
         assertEq(fff.observeWithSeconds(0, 10 minutes), 2479596_49767);
         assertEq(fff.observeWithSeconds(0, 20 minutes), 2478947_64006);
         assertEq(fff.observeWithSeconds(0, 30 minutes), 2478670_44578);
