@@ -117,6 +117,46 @@ contract FFFTest is Test {
         fff.commit(tick, volume);
     }
 
+    function testConsultSample() public {
+        fff = new FFF();
+
+        uint256 currenttime = block.timestamp;
+        fff.commit(-152095, 25538628300000000000);
+
+        vm.warp(1689411024);
+        fff.commit(-152095, 11492125570000000000);
+
+        vm.warp(1689411132);
+        fff.commit(-152098, 25180523970000000000);
+
+        vm.warp(1689411216);
+        fff.commit(-152102, 28599701620000000000);
+
+        vm.warp(1689411300);
+        fff.commit(-152106, 12481998960000000000);
+
+        vm.warp(1689411492);
+        fff.commit(-152106, 16992738350000000000);
+
+        vm.warp(1689411588);
+        fff.commit(-152102, 52576573590000000000);
+
+        vm.warp(1689411684);
+        fff.commit(-152100, 11206931030000000000);
+        
+        vm.warp(1689411780);
+        fff.commit(-152102, 28599701620000000000);
+
+        vm.warp(1689411780);
+        fff.commit(-152102, 28599701620000000000);
+
+        vm.warp(1689411876);
+        (int24 arithmeticMeanTick,) = fff.consultWithSeconds(5 minutes);
+        console.logInt(arithmeticMeanTick);
+        uint160 sqrtPrice = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
+        console.log(Math.mulDiv(uint256(sqrtPrice) * uint256(sqrtPrice), 10 ** 18, 1 << 192));
+    }
+
     function testConsult() public view {
         (int24 arithmeticMeanTick,) = fff.consultWithSeconds(192);
         console.logInt(arithmeticMeanTick);
