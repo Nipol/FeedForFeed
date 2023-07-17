@@ -120,7 +120,6 @@ contract FFFTest is Test {
     function testConsultSample() public {
         fff = new FFF();
 
-        uint256 currenttime = block.timestamp;
         fff.commit(-152095, 25538628300000000000);
 
         vm.warp(1689411024);
@@ -179,6 +178,28 @@ contract FFFTest is Test {
         console.log(Math.mulDiv(uint256(sqrtPrice) * uint256(sqrtPrice), 10 ** 18, 1 << 192));
 
         (arithmeticMeanTick,) = fff.consultWithSeconds(20 minutes);
+        console.logInt(arithmeticMeanTick);
+        sqrtPrice = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
+        console.log(Math.mulDiv(uint256(sqrtPrice) * uint256(sqrtPrice), 10 ** 18, 1 << 192));
+    }
+
+    function testConsultWithRange() public view {
+        (int24 arithmeticMeanTick,) = fff.consultWithSeconds(10 minutes, 5 minutes);
+        console.logInt(arithmeticMeanTick);
+        uint160 sqrtPrice = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
+        console.log(Math.mulDiv(uint256(sqrtPrice) * uint256(sqrtPrice), 10 ** 18, 1 << 192));
+
+        (arithmeticMeanTick,) = fff.consultWithSeconds(15 minutes, 10 minutes);
+        console.logInt(arithmeticMeanTick);
+        sqrtPrice = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
+        console.log(Math.mulDiv(uint256(sqrtPrice) * uint256(sqrtPrice), 10 ** 18, 1 << 192));
+
+        (arithmeticMeanTick,) = fff.consultWithSeconds(20 minutes, 15 minutes);
+        console.logInt(arithmeticMeanTick);
+        sqrtPrice = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
+        console.log(Math.mulDiv(uint256(sqrtPrice) * uint256(sqrtPrice), 10 ** 18, 1 << 192));
+
+        (arithmeticMeanTick,) = fff.consultWithSeconds(30 minutes, 20 minutes);
         console.logInt(arithmeticMeanTick);
         sqrtPrice = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
         console.log(Math.mulDiv(uint256(sqrtPrice) * uint256(sqrtPrice), 10 ** 18, 1 << 192));

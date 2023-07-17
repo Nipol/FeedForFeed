@@ -127,6 +127,48 @@ contract FFF {
         harmonicMeanLiquidity = uint128(secondsAgoX160 / (uint192(secondsPerVolumeCumulativesDelta) << 32));
     }
 
+    /**
+     * @notice  현재 시점으로부터, `SecondsAgo` 까지의 평균 Tick과, 프레임 사이의 평균, 초당 유동성을 반환
+     * @param   secondsAgo              현재 시점으로부터, 얼마나 뒤로 갈 것인지 초로 작성
+     * @return  arithmeticMeanTick      해당 시간 동안의 평균 Tick
+     * @return  harmonicMeanLiquidity   해당 시간 동안의 평균 초당 거래량
+     */
+    function consultWithSeconds(uint32 secondsAgo, uint32 start)
+        external
+        view
+        returns (int24 arithmeticMeanTick, uint128 harmonicMeanLiquidity)
+    {
+        Slot0 memory _slot0 = slot0;
+
+        uint32[] memory secondsAgos = new uint32[](2);
+        secondsAgos[0] = secondsAgo;
+        secondsAgos[1] = start;
+
+        (int56[] memory tickCumulatives, uint160[] memory secondsPerVolumeCumulativeX128s, uint32[] memory timestamps) =
+            observe(frames, uint32(block.timestamp), secondsAgos, _slot0.frameIndex, _slot0.frameCardinality);
+
+        uint32 frameSeconds = timestamps[1] - timestamps[0];
+        int56 tickCumulativesDelta = tickCumulatives[1] - tickCumulatives[0];
+        uint160 secondsPerVolumeCumulativesDelta =
+            secondsPerVolumeCumulativeX128s[1] - secondsPerVolumeCumulativeX128s[0];
+
+        bool isArithmeticMeanTick;
+
+        assembly {
+            arithmeticMeanTick := sdiv(tickCumulativesDelta, frameSeconds)
+            isArithmeticMeanTick := not(mod(tickCumulativesDelta, frameSeconds))
+        }
+
+        // Always round to negative infinity
+        if (tickCumulativesDelta < 0 && isArithmeticMeanTick) {
+            arithmeticMeanTick--;
+        }
+
+        // We are multiplying here instead of shifting to ensure that harmonicMeanLiquidity doesn't overflow uint128
+        uint192 secondsAgoX160 = uint192(frameSeconds) * type(uint160).max;
+        harmonicMeanLiquidity = uint128(secondsAgoX160 / (uint192(secondsPerVolumeCumulativesDelta) << 32));
+    }
+
     function increaseFrameCardinalityNext(uint16 frameCardinalityNext) public {
         uint16 frameCardinalityNextOld = slot0.frameCardinalityNext;
         uint16 frameCardinalityNextNew = grow(frames, frameCardinalityNextOld, frameCardinalityNext);
